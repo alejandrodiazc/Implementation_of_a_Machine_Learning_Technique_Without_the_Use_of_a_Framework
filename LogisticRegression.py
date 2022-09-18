@@ -1,24 +1,19 @@
+###########################################################################################
+# Libraries
+
 import pandas as pd
-
-data=pd.read_csv('Iris.csv')
-data=data[data['Species'] != 'Iris-virginica']
-data=data.drop('Id',axis=1)
-data['Species'].mask(data['Species']=='Iris-setosa',1,inplace=True)
-data['Species'].mask(data['Species']=='Iris-versicolor',0,inplace=True)
-
-from sklearn.model_selection import train_test_split
-
-data_train,data_test=train_test_split(data,test_size=0.25)
-Y_train=pd.DataFrame(data_train['Species'])
-Y_test=pd.DataFrame(data_test['Species'])
-X_train=data_train.drop('Species',axis=1)
-X_test=data_test.drop('Species',axis=1)
-
-
 import numpy as np
 import math
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+from sklearn.model_selection import train_test_split
 
-def get_h_theta(thetas,x):#thetas es una lista con todos los valores iniciales de theta
+
+# this function applies the sigmoid function as the hipothesis function
+def get_h_theta(thetas,x):#thetas is a list formed by all the initial values of theta
     h_theta=[]
     for i in range(len(x)):
         dummy1=[]
@@ -28,23 +23,25 @@ def get_h_theta(thetas,x):#thetas es una lista con todos los valores iniciales d
         h_theta.append(dummy2)
     return h_theta
 
+# this function gets the cost function (log-loss)
 def get_j_theta(h_theta,y):
     y_ln_=[]
     for i in range(len(y)):
         if y.iloc[i,:].item()==1:
-        #if y[i]==1:
             dummy=math.log(h_theta[i])
             y_ln_.append(dummy)
         elif y.iloc[i,:].item()==0:
         #elif y[i]==0:
-            dummy=math.log(1-h_theta[i])
+            # a very small number is added, in order to avoid 1-h_theta[i] equals zero (natural logarithm of zero is not possible)
+            avoid_zero=0.00000000000000000000000000000000001
+            dummy=math.log(1-h_theta[i]+avoid_zero)
             y_ln_.append(dummy)
     j_theta=(-1/len(y))*sum(y_ln_)
     return j_theta
 
+# this function calculates the new value of each theta, through the derivatives of the cost function
 def get_new_thetas(thetas,alpha,h_theta,y,x):
     new_thetas=[]
-    
     h_theta_y=[]
     for i in range(len(h_theta)):
         dummy=h_theta[i]-y.iloc[i,:].item()
@@ -61,6 +58,7 @@ def get_new_thetas(thetas,alpha,h_theta,y,x):
         new_thetas.append(new_theta)  
     return new_thetas
 
+# this function gets the class (or y value) for the x entries, with the newer thetas.
 def define_class(new_thetas,x_pred):
     class_h_theta=[]
     for i in range(len(x_pred)):
@@ -71,20 +69,53 @@ def define_class(new_thetas,x_pred):
         class_h_theta.append(dummy2)
     return class_h_theta
 
-def make_predictions(thetas,x,y,alpha,x_pred):
-    h_theta=get_h_theta(thetas,x)
-    j_theta=get_j_theta(h_theta,y)
-    new_thetas=get_new_thetas(thetas,alpha,h_theta,y,x)
-    class_h_theta=define_class(new_thetas,x_pred)
-    return class_h_theta,new_thetas
+# this function joins all of the previous functions and retrieves the predictions, once all of the iterations for training are performed
+def make_predictions(thetas,x,y,alpha,x_pred,num_iters):
+    for i in range(num_iters):
+        if i!=0:
+            thetas=new_thetas
+        h_theta=get_h_theta(thetas,x)
+        j_theta=get_j_theta(h_theta,y)
+        new_thetas=get_new_thetas(thetas,alpha,h_theta,y,x)
+        class_h_theta=define_class(new_thetas,x_pred)
+        y_pred=class_h_theta
+    return y_pred#,new_thetas
+
+# Display all of the metrics for evaluating the predictions
+def get_metrics(y,y_pred):
+    cm=confusion_matrix(y_true=y,y_pred=y_pred)
+    acc=accuracy_score(y_true=y,y_pred=y_pred)
+    prec=precision_score(y_true=y,y_pred=y_pred)
+    rec=recall_score(y_true=y,y_pred=y_pred)
+    f1=f1_score(y_true=y,y_pred=y_pred)
+    return cm,acc,prec,rec,f1
+
+###########################################################################################
+
+data=pd.read_csv('Iris.csv')
+data=data[data['Species'] != 'Iris-virginica']
+data=data.drop('Id',axis=1)
+data['Species'].mask(data['Species']=='Iris-setosa',int(1),inplace=True)
+data['Species'].mask(data['Species']=='Iris-versicolor',int(0),inplace=True)
 
 
+data_train,data_test=train_test_split(data,test_size=0.25)
+y_train=pd.DataFrame(data_train['Species'])
+y_test=pd.DataFrame(data_test['Species']).iloc[:,0].tolist()
+X_train=data_train.drop('Species',axis=1)
+X_test=data_test.drop('Species',axis=1)
 thetas=[10,0.5,0.25,0.3,0.1]
 alpha=0.5
-x=X_train
-y=Y_train
-x_pred=X_test
 
-class_h_theta,new_thetas=make_predictions(thetas,x,y,alpha,x_pred)
-print(class_h_theta)
-print(Y_test['Species'].tolist())
+y_pred=make_predictions(thetas,X_train,y_train,alpha,X_test,1)
+cm,acc,prec,rec,f1=get_metrics(y_test,y_pred)
+
+print("Predictions from the test set:",y_pred)
+print("True positives of test vs. predictions:",cm[0][0])
+print("False negatives of test vs. predictions:",cm[0][1])
+print("Flase positives of test vs. predictions:",cm[1][0])
+print("True negatives of test vs. predictions:",cm[1][1])
+print("Accuracy of predictions:",acc)
+print("Precision of predictions:",prec)
+print("Recall of predictions:",rec)
+print("F1-score of predictions:",f1)
