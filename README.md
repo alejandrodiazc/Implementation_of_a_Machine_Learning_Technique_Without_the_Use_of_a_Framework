@@ -1,6 +1,11 @@
 # Implementation_of_a_Machine_Learning_Technique_Without_the_Use_of_a_Framework
+
+
+The following repository aims to demonstrate the implementation of a machine learning classification technique (in this case, Logistic Regression), without the use of a framework or library of functions. The main idea behind the code is to demonstrate the programming ability of certain mathematical formulas for classification and determining clases. Logistic Regression is employed as a classification algorithm that associates the probability of belonging to a certain class with the hypothesis function, which is a transformation that comes from linear regression. Some iterations must be done in order to optimize the behavior of the cost function and  get the best possible values for the thetas, which will allow to formulate precise predictions.
+
+The mathematical equations and calculus for determining the class of a particular instance are implemented in the LogisticRegression.py file, which is written in Python3 programming language. There, a further description of the algorithm and methodology for writting the Logistic Regression Classification technique can be found. Then, for testing and training the algorithm, the Iris dataset was used, with some modifications so that it only considered the information and instances of only two classes instead of three. The dataset can be found in the Iris.csv file.
+
+Then, in order to evaluate the performance of the algorithm, some predictions were generated with the test subset of the dataset; afterwards, the corresponding classification metrics were considered (the considered metrics were accuracy, precision, recall, f1-score and the confusion matrix). The input parameters (such as the values of thetas and the learning rate) may alter the obtained results; however, it must be considered that the algorithm actually gests quite precise and exact results. All of the metrics have an acceptable rate and the confusion matrix demonstrates that most of the predictions are correct, so performance is acceptable.
+
+
 https://experiencia21.tec.mx/courses/315754/assignments/9858927?return_to=https%3A%2F%2Fexperiencia21.tec.mx%2Fcalendar%23view_name%3Dmonth%26view_start%3D2022-08-28
-
-The following repository aims to demonstrate the implementation of a machine learning classification technique (in this case, Logistic Regression), without the use if a framework or library of functions.
-
-In order to do so, I had to implement some Python3 code, where I wrote a series of functions that implement the mathematical methods behind the Logistic Regression. Then, for trying out the result, I used the Iris daset with a few modifications, to verify if the algorithm worked properly.
